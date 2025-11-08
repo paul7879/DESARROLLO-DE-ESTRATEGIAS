@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desarrollo de Estrategias Emprendedoras</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-main);
+        }
+        /* Paleta de Colores "Executive Blue" - Las variables CSS se mantienen para el estilo HTML */
+        :root {
+            --bg-main: #f8fafc; /* slate-50 */
+            --bg-sidebar: #0f172a; /* slate-900 */
+            --bg-card: #ffffff;
+            --border-color: #e2e8f0; /* slate-200 */
+            --text-header: #0f172a; /* slate-900 */
+            --text-body: #475569; /* slate-600 */
+            --text-sidebar: #e2e8f0; /* slate-200 */
+            --text-sidebar-light: #94a3b8; /* slate-400 */
+            --color-primary: #3b82f6; /* blue-500 (Acento Principal) */
+            --color-primary-hover: #2563eb; /* blue-600 */
+            --color-secondary: #64748b; /* slate-500 (Color de Soporte) */
+            --color-tertiary: #38bdf8; /* sky-400 (Acento para Gráficos - Alto Contraste) */
+        }
+        
+        /* Sidebar (Oscura) */
+        .sidebar {
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border-color);
+        }
+        .sidebar-title {
+            color: var(--bg-card);
+        }
+        .nav-link {
+            color: var(--text-sidebar);
+            transition: all 0.2s ease;
+        }
+        .nav-link:hover {
+            color: var(--bg-card);
+            background-color: #1e293b; /* slate-800 */
+        }
+        .nav-link.active {
+            color: var(--color-primary);
+            background-color: #1e293b; /* slate-800 */
+        }
+        .nav-link.parent {
+            color: var(--text-sidebar);
+            font-weight: 600;
+        }
+        .nav-link.child {
+            color: var(--text-sidebar-light);
+            padding-left: 2.5rem;
+        }
+        .nav-link.child.active {
+            color: var(--color-primary);
+            background-color: transparent;
+            font-weight: 600;
+        }
+        .nav-link.child:hover {
+            color: var(--color-primary-hover);
+            background-color: #1e293b; /* slate-800 */
+        }
+        .submenu {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .submenu.open {
+            max-height: 500px;
+        }
+
+        /* Contenido (Claro) */
+        main {
+            background-color: var(--bg-main);
+        }
+        h1, h2, h3, h4 {
+            color: var(--text-header);
+            font-weight: 700; /* Bolder titles */
+        }
+        p, li {
+            color: var(--text-body);
+        }
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        }
+        .page-section { display: none; }
+        .page-section.active { display: block; }
+        .mobile-menu-btn {
+            color: var(--color-primary);
+        }
+
+        /* Contenedores de Gráficos */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 450px;
+        }
+        @media (min-width: 768px) {
+            .chart-container { height: 400px; }
+        }
+
+        /* Diagrama: 5 Fuerzas de Porter - FIX DE SOLAPAMIENTO */
+        .porter-five-forces {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            grid-template-rows: 1fr 1fr 1fr;
+            gap: 0.5rem; /* Reducir gap para mejor ajuste */
+            max-width: 700px;
+            margin: 1rem auto;
+            text-align: center;
+        }
+        .force {
+            background-color: #f8fafc; /* slate-50 */
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 0.75rem; /* Padding ligeramente menor */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            min-height: 80px; /* Asegurar altura mínima */
+        }
+        .force-center { 
+            border: 2px solid var(--color-primary);
+            background-color: var(--bg-card);
+            /* Alinear Rivalidad en el centro de la grilla */
+            grid-column: 2;
+            grid-row: 2;
+            padding: 1rem; /* Padding más grande en el centro */
+        }
+        /* Posicionamiento específico para Porter */
+        .force-top { grid-column: 2; grid-row: 1; }
+        .force-bottom { grid-column: 2; grid-row: 3; }
+        .force-left { grid-column: 1; grid-row: 2; }
+        .force-right { grid-column: 3; grid-row: 2; }
+
+        .force h4 {
+            font-size: 0.9rem; /* Títulos de fuerza un poco más pequeños */
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 0.25rem;
+        }
+        .force p {
+            font-size: 0.7rem; /* Texto de descripción más pequeño */
+            line-height: 1.2;
+        }
+        .force-center h4 {
+            font-size: 1.25rem;
+        }
+        .force-center p {
+            font-size: 0.8rem;
+        }
+
+
+        /* --- Estilos de Diagramas Producto (MODIFICADOS) --- */
+        .product-container { /* Nuevo Contenedor Flex */
+            display: flex;
+            flex-direction: column; /* Por defecto para móvil */
+            align-items: center;
+            gap: 2rem;
+            margin: 2rem auto;
+            max-width: 800px; /* Ancho máximo para el contenedor */
+        }
+        @media (min-width: 768px) {
+            .product-container {
+                flex-direction: row; /* Diseño de dos columnas en escritorio */
+                align-items: flex-start; /* Alinear arriba */
+                justify-content: center;
+            }
+        }
+        
+        .product-levels-diagram { /* El área que solo contiene los círculos */
+            position: relative;
+            width: 350px; /* Asegura el tamaño para el nivel más grande */
+            height: 350px;
+            flex-shrink: 0; /* Previene que se encoja */
+        }
+        
+        .level {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            /* Propiedades para centrar y mostrar texto */
+            display: flex; 
+            align-items: center;
+            justify-content: center;
+            text-align: center; /* Importante para texto multi-línea */
+            line-height: 1.2; /* Mejor espaciado de línea */
+            
+            font-weight: 700;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            color: var(--text-header);
+            padding: 0;
+            font-size: 1rem;
+        }
+        
+        .level-aumentado {
+            width: 350px;
+            height: 350px;
+            background-color: #e2e8f0; /* slate-200 */
+            font-size: 1.2rem;
+        }
+        .level-real {
+            width: 250px;
+            height: 250px;
+            background-color: #cbd5e1; /* slate-300 */
+            font-size: 1.1rem;
+        }
+        .level-nucleo {
+            width: 100px;
+            height: 100px;
+            background-color: var(--bg-card);
+            border: 2px solid var(--color-primary);
+            color: var(--color-primary);
+            font-size: 0.9rem;
+        }
+        
+        .product-descriptions { /* Nuevo: Contenedor para el texto */
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            flex-grow: 1; /* Permite que ocupe el espacio restante */
+            padding-top: 2rem; /* Alineación visual con el centro */
+            width: 100%;
+            max-width: 400px; /* Limitar el ancho del texto */
+        }
+        
+        .product-description-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: var(--text-body);
+        }
+        
+        .product-description-item h4 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin: 0;
+            line-height: 1.2;
+        }
+        .product-description-item p {
+            font-size: 0.9rem;
+            margin: 0;
+            line-height: 1.3;
+        }
+
+        /* Estilos para las flechas */
+        .arrow-icon {
+            color: var(--color-primary);
+            font-size: 1.5rem;
+            font-weight: 900;
+            line-height: 1;
+        }
+        
+        .cmi-perspective h4 {
+            color: var(--color-primary);
+        }
+        .creator-info {
+            padding-top: 1rem;
+            border-top: 1px solid #475569;
+            margin-top: 1rem;
+            color: var(--text-sidebar-light);
+            font-size: 0.75rem;
+        }
+        .creator-info strong {
+            color: var(--text-sidebar);
+        }
+        /* Estilo específico para la bibliografía */
+        .bibliografia-item {
+            margin-bottom: 1rem;
+            line-height: 1.4;
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+<body class="flex h-screen">
+
+    <nav id="sidebar" class="sidebar w-64 h-full overflow-y-auto flex-shrink-0 fixed lg:relative lg:translate-x-0 -translate-x-full transition-transform duration-300 ease-in-out z-20">
+        <div class="p-4">
+            <h2 class="sidebar-title text-xl font-bold text-center">Desarrollo de Estrategias Emprendedoras</h2>
+        </div>
+        <ul class="flex flex-col space-y-1 p-2">
+            <li><a href="#intro" class="nav-link parent flex items-center p-2 rounded-lg"><svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>Introducción</a></li>
+            
+            <li>
+                <button class="nav-link parent w-full text-left flex items-center p-2 rounded-lg submenu-toggle">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    Plan de Negocio
+                    <svg class="w-4 h-4 ml-auto arrow transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <ul class="submenu ml-4">
+                    <li><a href="#plan-objetivos" class="nav-link child block p-2 rounded-lg">1. Objetivos Estratégicos</a></li>
+                    <li><a href="#plan-producto" class="nav-link child block p-2 rounded-lg">2. Producto y Competencia</a></li>
+                    <li><a href="#plan-marketing" class="nav-link child block p-2 rounded-lg">3. Plan de Marketing (Mix)</a></li>
+                    <li><a href="#plan-ventas" class="nav-link child block p-2 rounded-lg">4. Plan de Ventas</a></li>
+                    <li><a href="#plan-rrhh" class="nav-link child block p-2 rounded-lg">5. Recursos Humanos</a></li>
+                    <li><a href="#plan-legal" class="nav-link child block p-2 rounded-lg">6. Aspectos Legales</a></li>
+                    <li><a href="#plan-financiacion" class="nav-link child block p-2 rounded-lg">7. Plan de Financiación</a></li>
+                </ul>
+            </li>
+
+            <li>
+                <button class="nav-link parent w-full text-left flex items-center p-2 rounded-lg submenu-toggle">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                    Plan Estratégico
+                    <svg class="w-4 h-4 ml-auto arrow transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <ul class="submenu ml-4">
+                    <li><a href="#estrategico-definicion" class="nav-link child block p-2 rounded-lg">1. Definición e Importancia</a></li>
+                    <li><a href="#estrategico-marcha" class="nav-link child block p-2 rounded-lg">2. Puesta en Marcha (CMI)</a></li>
+                </ul>
+            </li>
+
+            <li><a href="#conclusion" class="nav-link parent flex items-center p-2 rounded-lg"><svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 11l3-3m0 0l3 3m-3-3v8m0-13a9 9 0 110 18 9 9 0 010-18z"></path></svg>Conclusión</a></li>
+            
+            <li><a href="#bibliografia" class="nav-link parent flex items-center p-2 rounded-lg"><svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.5v11M12 6.5c-2.76 0-5 2.15-5 5s2.24 5 5 5 5-2.15 5-5-2.24-5-5-5zM12 6.5a7 7 0 017 7 7 7 0 01-7 7 7 7 0 01-7-7 7 7 0 017-7z"></path></svg>Bibliografía</a></li>
+            </ul>
+        
+        <div class="p-4 creator-info text-xs">
+            <h5 class="text-sm font-bold mb-2">METADATOS</h5>
+            <p><strong>ASIGNATURA:</strong> LIDERAZGO</p>
+            <p><strong>DOCENTE:</strong> ING. EDUARDO LUIS DIAZ SANDOYA</p>
+            <p><strong>CURSO:</strong> [6TO SEMESTRE-TI] - PARALELO C2</p>
+            <h5 class="text-sm font-bold mt-3 mb-1">ALUMNOS:</h5>
+            <ul class="list-disc ml-4 space-y-0">
+                <li>AYALA ALBIÑO DAVIS MISAEL</li>
+                <li>CAMACHO RIVERA CESAR PAUL</li>
+                <li>CARCELEN CHOEZ DAMIAN DAVID</li>
+                <li>DELGADO RIVAS JUAN DIEGO</li>
+                <li>QUIMI PONGUILLO DANIEL EFRAIN</li>
+                <li>RETTO ANTON ANGELICA ALEXANDRA</li>
+            </ul>
+        </div>
+    </nav>
+
+    <button id="mobile-menu-btn" class="mobile-menu-btn lg:hidden fixed top-4 left-4 z-30 p-2 bg-white rounded-md shadow-lg">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+    </button>
+    <div id="mobile-overlay" class="lg:hidden fixed inset-0 bg-black opacity-50 z-10 hidden"></div>
+
+    <main class="flex-1 h-full overflow-y-auto p-6 lg:p-10">
+        <div id="content-container" class="max-w-4xl mx-auto">
+            
+            <header class="text-center mb-10 pb-4 border-b border-slate-200">
+                <p class="text-base text-slate-600 font-semibold">ASIGNATURA: LIDERAZGO | DOCENTE: ING. EDUARDO LUIS DIAZ SANDOYA</p>
+                <h1 class="text-4xl font-extrabold mt-1" style="color: var(--color-primary);">DESARROLLO DE ESTRATEGIAS EMPRENDEDORAS</h1>
+            </header>
+
+            <section id="intro" class="page-section active">
+                <h2 class="text-3xl font-extrabold mb-6">Introducción a Estratégias Emprendedor</h2>
+                <div class="card p-6 space-y-4">
+                    <p class="text-lg">Esta sección es la puerta de entrada para explorar los <strong>modelos teóricos</strong> que sustentan la creación de una empresa. El objetivo es proporcionar un marco conceptual sólido que guíe la <strong>toma de decisiones estratégicas</strong>, desde la ideación del producto hasta la medición del éxito a largo plazo. Utilice la barra lateral para saltar directamente a cualquier concepto de interés (ej. la estructura legal o el modelo de las 5 Fuerzas).</p>
+                    <div>
+                        <h3 class="text-2xl font-bold mb-2" style="color: var(--color-primary);">Propósito y Enfoque Estratégico</h3>
+                        <p class="mb-2">Explicar los conceptos <strong>teóricos fundamentales</strong> que estructuran el desarrollo de un plan de estrategias emprendedoras. Actúan como el <strong>mapa mental</strong> para la asignación de recursos y la construcción de la <strong>ventaja competitiva</strong>.</p>
+                        <p>Las estrategias emprendedoras son el <strong>marco conceptual</strong> que permite a una nueva empresa navegar la incertidumbre, alinear recursos y construir una <strong>ventaja competitiva sostenible</strong>.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="plan-objetivos" class="page-section">
+                <h2 class="text-3xl font-extrabold mb-6">1. Objetivos Estratégicos: Plazo y Enfoque</h2>
+                <div class="card p-6 mb-6">
+                    <p class="mb-4">Los objetivos son la articulación formal de la intención estratégica, sirviendo como <strong>criterios de control</strong>. Es crucial equilibrar los objetivos inmediatos de <strong>eficiencia</strong> (Corto Plazo) con las metas de <strong>crecimiento y supervivencia</strong> (Largo Plazo).</p>
+                    <div class="chart-container">
+                        <canvas id="objetivosChart"></canvas>
+                    </div>
+                </div>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="card p-6">
+                        <h3 class="text-xl font-bold mb-2">Corto Plazo (Tácticos)</h3>
+                        <p>Metas operacionales con horizonte temporal inmediato (<strong>6-12 meses</strong>). Se enfocan en resultados de eficiencia, flujos de caja y <strong>procesos internos</strong>. Su logro es la base para el éxito estratégico.</p>
+                    </div>
+                    <div class="card p-6">
+                        <h3 class="text-xl font-bold mb-2">Largo Plazo (Estratégicos)</h3>
+                        <p>Metas visionarias y de permanencia (<strong>3-5 años o más</strong>). Definen la posición deseada de la empresa en el ecosistema, asegurando la <strong>supervivencia</strong>, la cuota de mercado y la <strong>diferenciación</strong>.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="plan-producto" class="page-section">
+                <h2 class="text-3xl font-extrabold mb-6">2. Producto y Competencia: Estructura del Valor y del Mercado</h2>
+                <div class="card p-6 mb-6">
+                    <h3 class="text-2xl font-bold mb-4 text-center" style="color: var(--color-primary);">Producto (Tres Niveles del Valor) </h3>
+                    <p class="text-center mb-4">El producto es la <strong>proposición de valor total</strong>. Esta visualización descompone la oferta en sus <strong>elementos constitutivos</strong>, desde el beneficio intrínseco hasta los servicios periféricos.</p>
+                    
+                    <div class="product-container">
+                        <div class="product-levels-diagram">
+                            <div class="level level-aumentado">
+                                <span class="p-4"><strong>AUMENTADO</strong><br>(Servicios Periféricos)</span>
+                            </div>
+                            <div class="level level-real">
+                                <span><strong>REAL</strong><br>(Tangible)</span>
+                            </div>
+                            <div class="level level-nucleo">
+                                <span><strong>NÚCLEO</strong></span>
+                            </div>
+                        </div>
+                        
+                        <div class="product-descriptions">
+                            
+                            <div class="product-description-item">
+                                <span class="arrow-icon">➡</span>
+                                <div>
+                                    <h4 style="color: #3b82f6;">Núcleo (Beneficio Esencial)</h4>
+                                    <p>El <strong>beneficio fundamental</strong> o servicio que el cliente realmente compra (ej. descanso en un hotel).</p>
+                                </div>
+                            </div>
+
+                            <div class="product-description-item">
+                                <span class="arrow-icon">➡</span>
+                                <div>
+                                    <h4 style="color: #64748b;">Real (Tangible)</h4>
+                                    <p>Los atributos tangibles: <strong>Marca, Diseño, Calidad y Empaque</strong> (ej. la habitación, la marca Hilton).</p>
+                                </div>
+                            </div>
+
+                            <div class="product-description-item">
+                                <span class="arrow-icon">➡</span>
+                                <div>
+                                    <h4 style="color: #475569;">Aumentado (Servicios Periféricos)</h4>
+                                    <p>Los servicios adicionales: <strong>Entrega, Crédito, Instalación, y Servicio Post-Venta/Garantía</strong>.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                <div class="card p-6">
+                    <h3 class="text-2xl font-bold mb-4 text-center" style="color: var(--color-primary);">Análisis de Competencia (5 Fuerzas de Porter) </h3>
+                    <p class="text-center mb-4">Este marco evalúa la <strong>atractividad de la industria</strong>, un paso crucial antes de formular cualquier estrategia. Cuanto mayor sea la intensidad de estas fuerzas, menor será el potencial de <strong>beneficio</strong>.</p>
+                    
+                    <div class="porter-five-forces text-xs md:text-sm">
+                        <div class="force force-top">
+                            <h4>Amenaza de Nuevos Entrantes</h4>
+                            <p class="text-xs mt-1">Depende de las <strong>barreras de entrada</strong> (economías de escala, requisitos de capital, política gubernamental).</p>
+                        </div>
+                        <div class="force force-left">
+                            <h4>Poder de Proveedores</h4>
+                            <p class="text-xs mt-1">Su capacidad para <strong>aumentar precios</strong> o reducir calidad de bienes vendidos. Alto si hay pocos proveedores o si los <strong>costos de cambio</strong> son altos.</p>
+                        </div>
+                        <div class="force force-center">
+                            <h4 class="text-lg font-bold">Rivalidad de Competidores</h4>
+                            <p class="text-sm mt-1">El grado de intensidad de la <strong>competencia</strong> entre las empresas existentes en la industria.</p>
+                        </div>
+                        <div class="force force-right">
+                            <h4>Poder de Clientes</h4>
+                            <p class="text-xs mt-1">Su capacidad para forzar la <strong>reducción de precios</strong>. Alto si compran grandes volúmenes o si existen muchos <strong>productos sustitutos</strong>.</p>
+                        </div>
+                        <div class="force force-bottom">
+                            <h4>Amenaza de Sustitutos</h4>
+                            <p class="text-xs mt-1">Productos o servicios que cumplen la <strong>misma función</strong>. Obliga a <strong>limitar los precios</strong>.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="plan-marketing" class="page-section">
+                <h2 class="text-3xl font-extrabold mb-6">3. Plan de Marketing: El Marketing Mix (4 P's)</h2>
+                <div class="card p-6">
+                    <p class="mb-6 text-lg">El <strong>Marketing Mix</strong> define cómo la empresa implementará su estrategia. Seleccione cada componente para ver su definición y las <strong>preguntas estratégicas clave</strong> que debe abordar.</p>
+                    
+                    <div id="mix-buttons" class="flex flex-wrap justify-center gap-4 mb-6">
+                        <button data-mix="producto" class="mix-btn p-3 rounded-lg font-semibold bg-blue-100 hover:bg-blue-200 transition active:bg-blue-300" style="color: var(--color-primary);">Producto</button>
+                        <button data-mix="precio" class="mix-btn p-3 rounded-lg font-semibold bg-slate-100 hover:bg-slate-200 transition active:bg-slate-300" style="color: var(--text-body);">Precio</button>
+                        <button data-mix="distribucion" class="mix-btn p-3 rounded-lg font-semibold bg-slate-100 hover:bg-slate-200 transition active:bg-slate-300" style="color: var(--text-body);">Distribución (Place)</button>
+                        <button data-mix="promocion" class="mix-btn p-3 rounded-lg font-semibold bg-slate-100 hover:bg-slate-200 transition active:bg-slate-300" style="color: var(--text-body);">Promoción</button>
+                    </div>
+
+                    <div id="mix-detail-panel" class="card p-6 bg-white border-2" style="border-color: var(--border-color);">
+                        <h3 id="mix-title" class="text-2xl font-bold mb-3" style="color: var(--color-primary);">Seleccione un elemento del Marketing Mix</h3>
+                        <p id="mix-definition" class="mb-4">Haga clic en uno de los botones de arriba para explorar la <strong>definición teórica</strong>, las variables clave y las <strong>decisiones estratégicas</strong> de ese componente.</p>
+                        <ul id="mix-questions" class="list-disc ml-5 space-y-2">
+                            <li class="font-semibold">Variables a considerar.</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section id="plan-ventas" class="page-section">
+                <h2 class="text-3xl font-extrabold mb-6">4. Plan de Ventas: Modelo y Estrategias</h2>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="card p-6">
+                        <h3 class="text-xl font-bold mb-2" style="color: var(--color-primary);">Ciclo de Ventas </h3>
+                        <p>Un <strong>modelo conceptual</strong> que describe las etapas progresivas: <strong>Prospección</strong> (identificar leads), <strong>Calificación</strong> (determinar si el lead es viable), <strong>Presentación</strong> (comunicar el valor), <strong>Manejo de Objeciones</strong> (resolver dudas), <strong>Cierre</strong> (ejecutar la transacción) y <strong>Seguimiento</strong> (fidelización).</p>
+                    </div>
+                    <div class="card p-6">
+                        <h3 class="text-xl font-bold mb-2" style="color: var(--color-primary);">Estrategias de Ventas Clave</h3>
+                        <p class="mb-2"><strong>Venta Transaccional:</strong> Enfoque de <strong>corto plazo</strong>, centrado en el producto y el precio, con el objetivo de maximizar el <strong>volumen inmediato</strong>. Ideal para productos básicos o commodities.</p>
+                        <p><strong>Venta Consultiva:</strong> Enfoque de <strong>largo plazo</strong>, centrado en la <strong>solución de problemas del cliente</strong> y la creación de relaciones. Requiere una <strong>comprensión profunda</strong> del negocio del cliente.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="plan-rrhh" class="page-section">
+                <h2 class="text-3xl font-extrabold mb-6">5. Recursos Humanos: Liderazgo y Planificación</h2>
+                <div class="card p-6 mb-6">
+                    <h3 class="text-2xl font-bold mb-4 text-center" style="color: var(--color-primary);">Análisis Comparativo de Estilos de Liderazgo </h3>
+                    <p class="mb-4">El tipo de liderazgo afecta directamente la <strong>cultura y la gestión del talento</strong>. Este gráfico de radar compara los enfoques más comunes a lo largo de <strong>dimensiones clave</strong> de la gestión.</p>
+                    <div class="chart-container">
+                        <canvas id="liderazgoChart"></canvas>
+                    </div>
+                </div>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="card p-6">
+                        <h3 class="text-xl font-bold mb-2">Planificación de Personal</h3>
+                        <p>Proceso teórico de <strong>prever la demanda y oferta futura de talento</strong> (capital humano) para asegurar que la organización tenga el <strong>número y tipo correcto de personas</strong>, alineando la estrategia de RRHH con los objetivos empresariales.</p>
+                    </div>
+                    <div class="card p-6">
+                        <h3 class="text-xl font-bold mb-2">Diseño de Roles</h3>
+                        <p>La <strong>especificación formal</strong> del contenido, los métodos y las relaciones de los puestos de trabajo. Clave: La <strong>Gestión por Competencias</strong>, que se enfoca en las <strong>habilidades y conocimientos</strong> requeridos para el desempeño exitoso.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="plan-legal" class="page-section">
+                <h2 class="text-3xl font-extrabold mb-6">6. Aspectos Legales: Estructura y Marco Normativo</h2>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="card p-6">
+                        <h3 class="text-xl font-bold mb-2" style="color: var(--color-primary);">Estructura Jurídica y Responsabilidad</h3>
+                        <p>La <strong>forma legal de propiedad</strong> (SRL, SA, Unipersonal) que determina la <strong>responsabilidad legal</strong> de los socios, las <strong>obligaciones fiscales</strong> y la estructura de gobernanza de la compañía.</p>
+                    </div>
+                    <div class="card p-6">
+                        <h3 class="text-xl font-bold mb-2" style="color: var(--color-primary);">Marco Normativo</h3>
+                        <p>El conjunto de leyes, reglamentos y estándares obligatorios: <strong>Laborales</strong> (contratación, seguridad), <strong>Comerciales</strong> (contratos, competencia), <strong>Propiedad Intelectual</strong> (patentes, marcas) y <strong>Protección de Datos</strong>.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="plan-financiacion" class="page-section">
+                <h2 class="text-3xl font-extrabold mb-6">7. Plan de Financiación: Estructura de Capital</h2>
+                <div class="card p-6 mb-6">
+                    <h3 class="text-2xl font-bold mb-2 text-center" style="color: var(--color-primary);">Fuentes de Financiación (Capital vs. Deuda) </h3>
+                    <p class="mb-4 text-center">La decisión crítica es la <strong>estructura de capital</strong>. El <strong>Capital</strong> implica ceder participación (equity) pero sin obligación de <strong>repago fijo</strong>. La <strong>Deuda</strong> mantiene la propiedad pero conlleva un <strong>costo financiero</strong> (intereses).</p>
+                    <div class="chart-container">
+                        <canvas id="financeChart"></canvas>
+                    </div>
+                </div>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="card p-6">
+                        <h3 class="text-xl font-bold mb-2">Costos Iniciales y Punto de Equilibrio</h3>
+                        <p>Conceptualización de los <strong>gastos de capital</strong> (inversiones en activos fijos) y <strong>gastos operativos</strong> necesarios para iniciar operaciones. El <strong>punto de equilibrio operativo</strong> es el volumen de ventas necesario para cubrir estos costos.</p>
+                    </div>
+                    <div class="card p-6">
+                        <h3 class="text-xl font-bold mb-2">Gestión Financiera</h3>
+                        <p>La disciplina de planificar, organizar, dirigir y controlar los recursos monetarios. Clave: <strong>Gestión de Flujo de Caja</strong> (Cash Flow), que asegura la <strong>liquidez operativa</strong>.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="estrategico-definicion" class="page-section">
+                <h2 class="text-3xl font-extrabold mb-6">Plan Estratégico: Definición e Impulso</h2>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="card p-6">
+                        <h3 class="text-xl font-bold mb-2" style="color: var(--color-primary);">Proceso Teórico </h3>
+                        <p>El proceso de definir la <strong>visión, misión y objetivos a largo plazo</strong>. Implica el <strong>análisis FODA</strong> (interno/externo) y la formulación de <strong>estrategias competitivas</strong> (e.g., diferenciación, enfoque) para lograr una <strong>ventaja duradera</strong>.</p>
+                    </div>
+                    <div class="card p-6">
+                        <h3 class="text-xl font-bold mb-2" style="color: var(--color-primary);">Importancia (Crecimiento y Sostenibilidad)</h3>
+                        <p>Proporciona el marco para la <strong>asignación de recursos</strong>, la coherencia en la toma de decisiones y la adaptabilidad. Es el plan para la <strong>Supervivencia a Largo Plazo</strong> en el mercado.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="estrategico-marcha" class="page-section">
+                <h2 class="text-3xl font-extrabold mb-6">Puesta en Marcha: El Cuadro de Mando Integral (CMI)</h2>
+                <div class="card p-6 mb-6">
+                    <h3 class="text-2xl font-bold mb-2 text-center" style="color: var(--color-primary);">Control y Medición (CMI) </h3>
+                    <p class="mb-4 text-center">El <strong>CMI</strong> de Kaplan & Norton es un sistema de gestión que <strong>traduce la visión y la estrategia en acción</strong>. Mide el desempeño desde <strong>cuatro perspectivas interrelacionadas</strong>, asegurando un balance entre <strong>resultados financieros y no financieros</strong>.</p>
+                    <div class="cmi-diagram flex flex-wrap justify-center gap-4">
+                        <div class="cmi-perspective w-full md:w-5/12 card p-4">
+                            <h4>Financiera</h4>
+                            <p>Mide los <strong>resultados económicos</strong> del esfuerzo estratégico (ROI, margen).</p>
+                        </div>
+                        <div class="cmi-perspective w-full md:w-5/12 card p-4">
+                            <h4>Cliente</h4>
+                            <p>Mide el <strong>valor entregado</strong> (satisfacción, retención, cuota de mercado).</p>
+                        </div>
+                        <div class="cmi-perspective w-full md:w-5/12 card p-4">
+                            <h4>Procesos Internos</h4>
+                            <p>Mide la <strong>eficiencia y calidad</strong> de los procesos críticos que crean valor.</p>
+                        </div>
+                        <div class="cmi-perspective w-full md:w-5/12 card p-4">
+                            <h4>Aprendizaje y Crecimiento</h4>
+                            <p>Mide la <strong>capacidad de la organización para innovar</strong> y mejorar (capital humano, tecnología).</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="conclusion" class="page-section">
+                <h2 class="text-3xl font-extrabold mb-6">Conclusión del Marco Estratégico</h2>
+                <div class="card p-6 space-y-4">
+                    <p class="text-lg">Esta sección resume la <strong>integración</strong> de todos los componentes teóricos analizados.</p>
+                    <div>
+                        <h3 class="text-xl font-bold mb-2" style="color: var(--color-primary);">Puntos Clave</h3>
+                        <ul class="list-disc ml-5 space-y-2">
+                            <li><strong>Coherencia:</strong> La estrategia emprendedora exige una <strong>alineación total</strong> entre el Plan de Negocio (corto/táctico) y el Plan Estratégico (largo/visionario).</li>
+                            <li><strong>Análisis vs. Acción:</strong> El análisis de Porter y la segmentación informan el Marketing Mix, y las decisiones de Liderazgo impactan la <strong>Puesta en Marcha</strong>.</li>
+                            <li><strong>Medición:</strong> El CMI es el <strong>nexo final</strong>, asegurando que el control no sea solo financiero, sino integral.</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="bibliografia" class="page-section">
+                <h2 class="text-3xl font-extrabold mb-6">Bibliografía: Referencias Teóricas Clave</h2>
+                <div class="card p-6 space-y-4">
+                    <p class="text-lg mb-4 font-semibold">Fuentes Teóricas Clave (Formato Sugerido APA):</p>
+                    <div class="space-y-4">
+                        <p class="bibliografia-item">Drucker, P. F. (1985). <strong>Innovation and Entrepreneurship</strong>. Harper & Row. <em>(Referencia para la importancia de las estrategias)</em></p>
+                        <p class="bibliografia-item">Kaplan, R. S., & Norton, D. P. (1996). <strong>The Balanced Scorecard: Translating Strategy into Action</strong>. Harvard Business School Press. <em>(Referencia para CMI)</em></p>
+                        <p class="bibliografia-item">Kotler, P., & Armstrong, G. (2022). <strong>Principles of Marketing</strong> (19th ed.). Pearson Education. <em>(Referencia para Marketing Mix y Ciclo de Ventas)</em></p>
+                        <p class="bibliografia-item">Porter, M. E. (1985). <strong>Competitive Advantage: Creating and Sustaining Superior Performance</strong>. Free Press. <em>(Referencia para las 5 Fuerzas de Porter)</em></p>
+                    </div>
+                </div>
+            </section>
+            </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const pageSections = document.querySelectorAll('.page-section');
+            const submenuToggles = document.querySelectorAll('.submenu-toggle');
+            const sidebar = document.getElementById('sidebar');
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const mobileOverlay = document.getElementById('mobile-overlay');
+
+            // --- DATASETS (Actualizado con <strong>) ---
+            const marketingMixData = {
+                producto: {
+                    title: "Producto: El Valor Central de la Oferta",
+                    definition: "Define los atributos físicos, funcionales y de servicio que componen el valor ofrecido al cliente.",
+                    questions: [
+                        "¿Qué <strong>beneficio esencial</strong> estamos vendiendo (Núcleo)?",
+                        "¿Qué características, calidad y diseño debe tener?",
+                        "¿Cómo se gestionará la marca, el empaque y la garantía?",
+                        "¿Cómo se <strong>diferencia</strong> nuestra oferta del sustituto más cercano?"
+                    ],
+                    color: '#3B82F6' // blue-500
+                },
+                precio: {
+                    title: "Precio: La Captura de Valor",
+                    definition: "Es la cantidad de dinero que los clientes deben pagar. Es el único elemento del mix que genera ingresos, el resto son costos.",
+                    questions: [
+                        "¿Cuál es el <strong>costo de producción</strong> y los <strong>márgenes de beneficio</strong> deseados?",
+                        "¿Cuál es el precio de la competencia y los sustitutos?",
+                        "¿Qué tan <strong>elástica</strong> es la demanda del mercado?",
+                        "¿Usaremos estrategias de <strong>penetración</strong>, <strong>descremado</strong> o <strong>precios psicológicos</strong>?"
+                    ],
+                    color: '#0f172a' // slate-900 (var(--text-header))
+                },
+                distribucion: {
+                    title: "Distribución (Place): El Acceso al Cliente",
+                    definition: "Incluye las actividades de la empresa para hacer que el producto esté disponible para los consumidores objetivo, desde el canal hasta la logística.",
+                    questions: [
+                        "¿Se utilizará un <strong>canal directo</strong> (e-commerce, fuerza de ventas) o <strong>indirecto</strong> (mayoristas, minoristas)?",
+                        "¿Cuál es la <strong>cobertura geográfica</strong> ideal?",
+                        "¿Qué estrategias logísticas (almacenamiento, transporte) se implementarán?",
+                        "¿Cómo se seleccionará, incentivará y <strong>evaluará a los intermediarios</strong>?"
+                    ],
+                    color: '#0f172a' // slate-900 (var(--text-header))
+                },
+                promocion: {
+                    title: "Promoción: La Comunicación del Valor",
+                    definition: "Son las actividades que comunican los méritos del producto y persuaden al público objetivo a comprar.",
+                    questions: [
+                        "¿Cuál es el <strong>mensaje central</strong> y el <strong>posicionamiento</strong> que se comunicará?",
+                        "¿Qué mezcla de herramientas se usará (<strong>publicidad</strong>, RR.PP., <strong>venta personal</strong>, promoción de ventas)?",
+                        "¿Cuál será el <strong>presupuesto total</strong> de promoción?",
+                        "¿Cómo se medirán la <strong>efectividad</strong> y el <strong>ROI</strong> de las campañas?"
+                    ],
+                    color: '#0f172a' // slate-900 (var(--text-header))
+                }
+            };
+            
+            const initialMixType = 'producto';
+
+
+            // --- LÓGICA DE NAVEGACIÓN Y MENÚ ---
+            function showPage(pageId) {
+                pageSections.forEach(section => {
+                    section.classList.remove('active');
+                });
+                const targetPage = document.getElementById(pageId);
+                if (targetPage) {
+                    targetPage.classList.add('active');
+                } else {
+                    document.getElementById('intro').classList.add('active');
+                }
+                updateActiveLink(pageId);
+                sidebar.classList.add('-translate-x-full');
+                mobileOverlay.classList.add('hidden');
+                
+                // Redimensionar gráficos al mostrar
+                if (window.myCharts && window.myCharts[pageId]) {
+                    // Esperar un momento para que la sección sea visible antes de redimensionar el canvas
+                    setTimeout(() => window.myCharts[pageId].resize(), 50);
+                }
+            }
+
+            function updateActiveLink(pageId) {
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.href && link.href.includes('#')) {
+                         const linkPageId = link.getAttribute('href').substring(1);
+                        if (linkPageId === pageId) {
+                            link.classList.add('active');
+                            const parentSubmenu = link.closest('.submenu');
+                            if (parentSubmenu && !parentSubmenu.classList.contains('open')) {
+                                parentSubmenu.classList.add('open');
+                                parentSubmenu.previousElementSibling.querySelector('.arrow').classList.add('rotate-180');
+                            }
+                        }
+                    }
+                });
+            }
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    if (link.href && link.href.includes('#')) {
+                        e.preventDefault();
+                        const pageId = link.getAttribute('href').substring(1);
+                        showPage(pageId);
+                        window.location.hash = pageId;
+                    }
+                });
+            });
+
+            submenuToggles.forEach(toggle => {
+                toggle.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const submenu = toggle.nextElementSibling;
+                    const arrow = toggle.querySelector('.arrow');
+                    submenu.classList.toggle('open');
+                    arrow.classList.toggle('rotate-180');
+                });
+            });
+
+            mobileMenuBtn.addEventListener('click', () => {
+                sidebar.classList.remove('-translate-x-full');
+                mobileOverlay.classList.remove('hidden');
+            });
+
+            mobileOverlay.addEventListener('click', () => {
+                sidebar.classList.add('-translate-x-full');
+                mobileOverlay.classList.add('hidden');
+            });
+
+            let initialPage = 'intro';
+            if (window.location.hash) {
+                initialPage = window.location.hash.substring(1);
+            }
+            showPage(initialPage);
+            
+            // --- INICIALIZACIÓN DE GRÁFICOS (Hexadecimal Forzado) ---
+            window.myCharts = {};
+
+            // 1. Gráfico de Financiación (Doughnut)
+            const initFinanceChart = () => {
+                const ctx = document.getElementById('financeChart');
+                // Colores directos para forzar el contraste en el editor
+                const COLOR_AZUL_PRINCIPAL = '#3B82F6'; // Azul medio (blue-500)
+                const COLOR_CIAN_CONTRASTE = '#06B6D4'; // Cian (cyan-600)
+                
+                if (ctx) {
+                    window.myCharts['plan-financiacion'] = new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Capital (Propio/Riesgo)', 'Deuda (Bancaria/Privada)'],
+                            datasets: [{
+                                label: 'Distribución Conceptual de Financiación',
+                                data: [65, 35],
+                                backgroundColor: [
+                                    COLOR_AZUL_PRINCIPAL, 
+                                    COLOR_CIAN_CONTRASTE
+                                ],
+                                hoverBackgroundColor: [
+                                    '#2563EB', // blue-600
+                                    '#0891B2'  // cyan-700
+                                ],
+                                borderColor: ['#ffffff', '#ffffff'],
+                                borderWidth: 4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { 
+                                    position: 'bottom', 
+                                    labels: { 
+                                        color: 'var(--text-body)', 
+                                        font: { size: 14, weight: '600' }
+                                    } 
+                                },
+                                title: { 
+                                    display: true, 
+                                    text: 'Estructura de Capital (Ratio Conceptual)', 
+                                    color: 'var(--text-header)',
+                                    font: { size: 18, weight: '700' }
+                                },
+                                tooltip: { 
+                                    callbacks: { 
+                                        label: (context) => `${context.label}: ${context.parsed}% del Total`,
+                                        title: () => 'Composición de la Financiación'
+                                    },
+                                    backgroundColor: 'var(--bg-sidebar)',
+                                    titleColor: 'var(--bg-card)',
+                                    bodyColor: 'var(--bg-card)',
+                                    padding: 12
+                                }
+                            }
+                        }
+                    });
+                }
+            };
+            
+            // 2. Gráfico de Objetivos (Barra)
+            const initObjetivosChart = () => {
+                const ctx = document.getElementById('objetivosChart');
+                // Colores directos para forzar el contraste en el editor
+                const COLOR_AZUL_PRINCIPAL = '#3B82F6';   // Azul medio (Estratégico)
+                const COLOR_GRIS_SOPORTE = '#64748B';    // Gris (Táctico)
+                
+                if (ctx) {
+                    window.myCharts['plan-objetivos'] = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: ['Tácticos (Corto Plazo)', 'Estratégicos (Largo Plazo)'],
+                            datasets: [{
+                                label: 'Enfoque Estratégico Temporal',
+                                data: [40, 60],
+                                backgroundColor: [
+                                    COLOR_GRIS_SOPORTE,     
+                                    COLOR_AZUL_PRINCIPAL        
+                                ],
+                                borderColor: 'transparent',
+                                borderWidth: 0,
+                                borderRadius: 6
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    max: 100,
+                                    title: { 
+                                        display: true, 
+                                        text: 'Porcentaje de Enfoque (%)',
+                                        color: 'var(--text-body)', 
+                                        font: { size: 14 }
+                                    },
+                                    ticks: { color: 'var(--text-body)' }
+                                },
+                                x: {
+                                    ticks: { color: 'var(--text-body)' },
+                                    grid: { display: false }
+                                }
+                            },
+                            plugins: {
+                                legend: { display: false },
+                                title: { 
+                                    display: true, 
+                                    text: 'Balance de Prioridad entre Plazos', 
+                                    color: 'var(--text-header)',
+                                    font: { size: 18, weight: '700' }
+                                }
+                            }
+                        }
+                    });
+                }
+            };
+            
+            // 3. Gráfico de Liderazgo (Radar)
+            const initLiderazgoChart = () => {
+                const ctx = document.getElementById('liderazgoChart');
+                // Colores directos para forzar el contraste en el editor
+                const COLOR_AZUL_PRINCIPAL = '#3B82F6'; // Azul (Autocrático)
+                const COLOR_VERDE_ESMERALDA = '#10B981'; // Verde (Participativo)
+                
+                if (ctx) {
+                    window.myCharts['plan-rrhh'] = new Chart(ctx, {
+                        type: 'radar',
+                        data: {
+                            labels: ['Toma de Decisiones', 'Orientación al Empleado', 'Control Operativo', 'Flexibilidad', 'Innovación'],
+                            datasets: [
+                                {
+                                    label: 'Liderazgo Autocrático',
+                                    data: [9, 2, 8, 1, 3],
+                                    fill: true,
+                                    backgroundColor: 'rgba(59, 130, 246, 0.2)', // Azul con transparencia
+                                    borderColor: COLOR_AZUL_PRINCIPAL,
+                                    pointBackgroundColor: COLOR_AZUL_PRINCIPAL,
+                                    pointBorderColor: '#fff',
+                                },
+                                {
+                                    label: 'Liderazgo Participativo',
+                                    data: [4, 9, 5, 8, 7],
+                                    fill: true,
+                                    backgroundColor: 'rgba(16, 185, 129, 0.2)', // Verde con transparencia
+                                    borderColor: COLOR_VERDE_ESMERALDA,
+                                    pointBackgroundColor: COLOR_VERDE_ESMERALDA,
+                                    pointBorderColor: '#fff',
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                title: { 
+                                    display: true, 
+                                    text: 'Perfil de Estilos de Liderazgo (Escala 1-10)', 
+                                    color: 'var(--text-header)',
+                                    font: { size: 18, weight: '700' }
+                                },
+                                legend: { labels: { color: 'var(--text-body)', font: { size: 14 } } }
+                            },
+                            scales: {
+                                r: {
+                                    angleLines: { color: 'var(--border-color)' },
+                                    suggestedMin: 0,
+                                    suggestedMax: 10,
+                                    pointLabels: { 
+                                        font: { size: 14, weight: '600' },
+                                        color: 'var(--text-body)' 
+                                    },
+                                    ticks: { display: false }
+                                }
+                            }
+                        }
+                    });
+                }
+            };
+            
+            // Inicializar todos los gráficos
+            initFinanceChart();
+            initObjetivosChart();
+            initLiderazgoChart();
+            
+            // --- LÓGICA DEL MARKETING MIX DINÁMICO ---
+            const mixDetailPanel = document.getElementById('mix-detail-panel');
+            const mixTitle = document.getElementById('mix-title');
+            const mixDefinition = document.getElementById('mix-definition');
+            const mixQuestions = document.getElementById('mix-questions');
+            const mixButtons = document.querySelectorAll('.mix-btn');
+
+            function updateMixDetails(mixType) {
+                const data = marketingMixData[mixType];
+
+                mixTitle.textContent = data.title;
+                mixDefinition.textContent = data.definition;
+                mixTitle.style.color = data.color;
+                mixDetailPanel.style.borderColor = data.color;
+
+                mixQuestions.innerHTML = '';
+                data.questions.forEach(q => {
+                    const li = document.createElement('li');
+                    // Usar innerHTML para interpretar las negritas (<strong>) en las preguntas
+                    li.innerHTML = q; 
+                    mixQuestions.appendChild(li);
+                });
+                
+                mixButtons.forEach(btn => {
+                    btn.classList.remove('bg-blue-100', 'hover:bg-blue-200');
+                    btn.classList.add('bg-slate-100', 'hover:bg-slate-200');
+                    btn.style.color = 'var(--text-body)';
+
+                    if (btn.dataset.mix === mixType) {
+                        btn.classList.remove('bg-slate-100', 'hover:bg-slate-200');
+                        btn.classList.add('bg-blue-100', 'hover:bg-blue-200');
+                        btn.style.color = 'var(--color-primary)';
+                    }
+                });
+            }
+
+            mixButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    updateMixDetails(btn.dataset.mix);
+                });
+            });
+            
+            updateMixDetails('producto'); // Inicia con Producto
+        });
+    </script>
+</body>
+</html>
